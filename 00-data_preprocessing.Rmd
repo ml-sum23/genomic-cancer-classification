@@ -1,0 +1,70 @@
+---
+title: "00-data_preprocessing"
+output: html_document
+date: "2023-07-05"
+---
+
+Credit for the code in this notebook: https://www.costalab.org/wp-content/uploads/2022/11/handout_day5.html#3_RNASeq_Normalization
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("SummarizedExperiment")
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(tidyverse)
+library(TCGAbiolinks)
+library(SummarizedExperiment)
+```
+
+```{r}
+query = GDCquery(
+  project = "TCGA-LIHC",
+  data.category = "Transcriptome Profiling", 
+  data.type = "Gene Expression Quantification",
+  experimental.strategy = "RNA-Seq",
+  workflow.type = "STAR - Counts",
+  sample.type = c("Primary Tumor", "Solid Tissue Normal"))
+
+GDCdownload(query)
+```
+```{r}
+lihc_res = getResults(query)
+colnames(lihc_res)
+```
+```{r}
+table(lihc_res$sample_type)
+```
+```{r}
+tcga_data = GDCprepare(query)
+dim(tcga_data)
+```
+
+```{r}
+colnames(colData(tcga_data))
+```
+```{r}
+table(tcga_data@colData$definition)
+```
+```{r}
+table(tcga_data@colData$ajcc_pathologic_stage)
+```
+```{r}
+dim(assay(tcga_data))    
+```
+```{r}
+head(assay(tcga_data)[,1:10])
+```
+```{r}
+saveRDS(object = tcga_data,
+        file = "tcga_data.RDS",
+        compress = FALSE)
+
+```
