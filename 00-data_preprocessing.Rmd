@@ -104,11 +104,34 @@ dataNorm <- na.omit(dataNorm)
 ```
 
 ```{r}
+library(MASS)
+
+write.matrix(dataFilt, 'dataFilt.csv', sep=",")
+```
+
+
+```{r}
 dataFilt <- TCGAbiolinks:::TCGAanalyze_Filtering(dataNorm, method = "quantile", qnt.cut = 0.25)
 ```
 
 ```{r}
-tgca_data
+write.matrix(colData(tcga_data)$shortLetterCode, 'y.csv')
 ```
+
+```{r}
+length(colData(tcga_data)$shortLetterCode)
+```
+
+
+```{r}
+dim(dataFilt)
+```
+
+```{r}
+dataFilt <- read.csv('dataFilt.csv', sep=',')
+head(dataFilt)
+```
+
+
 
 
