@@ -10,6 +10,7 @@ if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("SummarizedExperiment")
+BiocManager::install("EDASeq")
 ```
 
 ## R Markdown
@@ -22,6 +23,7 @@ When you click the **Knit** button a document will be generated that includes bo
 library(tidyverse)
 library(TCGAbiolinks)
 library(SummarizedExperiment)
+library(EDASeq)
 ```
 
 ```{r}
@@ -35,13 +37,16 @@ query = GDCquery(
 
 GDCdownload(query)
 ```
+
 ```{r}
 lihc_res = getResults(query)
 colnames(lihc_res)
 ```
+
 ```{r}
 table(lihc_res$sample_type)
 ```
+
 ```{r}
 tcga_data = GDCprepare(query)
 dim(tcga_data)
@@ -50,21 +55,60 @@ dim(tcga_data)
 ```{r}
 colnames(colData(tcga_data))
 ```
+
 ```{r}
 table(tcga_data@colData$definition)
 ```
+
 ```{r}
 table(tcga_data@colData$ajcc_pathologic_stage)
 ```
+
 ```{r}
 dim(assay(tcga_data))    
 ```
+
 ```{r}
-head(assay(tcga_data)[,1:10])
+head(assay(tcga_data)[,1:10]) # first 6 genes of the first 10 samples
 ```
+
 ```{r}
-saveRDS(object = tcga_data,
-        file = "tcga_data.RDS",
+saveRDS(object = dataFilt,
+        file = "dataFilt.RDS",
         compress = FALSE)
 
 ```
+
+```{r}
+tcga_data = readRDS(file = "tcga_data.RDS")
+```
+
+```{r}
+genes<- as.data.frame(rowData(tcga_data))
+```
+
+
+```{r}
+dataPrep <- TCGAanalyze_Preprocessing(
+  tcga_data,
+  cor.cut = 0.6,
+  filename = 'aaic_plot.png',
+  width = 1000,
+  height = 1000,
+  )
+```
+
+```{r}
+dataNorm <- TCGAbiolinks::TCGAanalyze_Normalization(dataPrep, geneInfoHT, method = "gcContent")
+dataNorm <- na.omit(dataNorm)
+```
+
+```{r}
+dataFilt <- TCGAbiolinks:::TCGAanalyze_Filtering(dataNorm, method = "quantile", qnt.cut = 0.25)
+```
+
+```{r}
+tgca_data
+```
+
+
