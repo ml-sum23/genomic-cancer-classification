@@ -1,5 +1,8 @@
 
 
+import streamlit as st
+
+import pandas as pd
 import tensorflow as tf
 from tensorflow.keras import models
 from tensorflow.keras import Sequential 
@@ -16,16 +19,39 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.metrics import accuracy_score, f1_score
 
+st.sidebar.header('User Input Parameters')
+
+hidden_layers = st.sidebar.slider('Hidden Layers', 2, 12, 1)
+learning_rate = st.sidebar.slider('Learning Rate', 0.000001, 1.0, 0.00001)
+epochs = st.sidebar.slider('Epochs', 50, 500, 50)
+patience = st.sidebar.slider('Patience', 0, 300, 50)
+    
+def user_input_features():
+    data = {'hidden_layers' : hidden_layers,
+            'learning_rate' : learning_rate,
+            'epochs' : epochs,
+            'patience' : patience}
+    input = pd.DataFrame(data, index=[0])
+    return input
+
+input_df = user_input_features()
+
+st.subheader('User Input Parameters')
+st.write(input_df)
+
+
 class NNModel:
     def __init__(self,
                  hidden_layers = None):
         seed_value = 42
         tf.random.set_seed(seed_value)
-        num_hidden_layers = hidden_layers[0]
+        #num_hidden_layers = hidden_layers[0]
         self.model = Sequential()
         x = 0
-        for x in range(num_hidden_layers+4,4, -1):
-            self.model.add(Dense(2**(num_hidden_layers)))
+        #for x in range(num_hidden_layers+4,4, -1):
+        for x in range(hidden_layers+4,4, -1):
+            #self.model.add(Dense(2**(num_hidden_layers)))
+            self.model.add(Dense(2**(hidden_layers)))
             self.model.add(LeakyReLU(alpha=0.2))
             self.model.add(Dropout(0.2))
         self.model.add(Dense(1, activation='sigmoid'))
@@ -86,3 +112,6 @@ def nnmodel_fit(X_train, Y_train, X_test, Y_test, hidden_layers, learning_rate=N
     
     # Return the evaluation metrics and training history
     return specificity, sensitivity, bal_acc, f1_score, history
+
+X_train, X_test, Y_train, Y_test = automate_data_processing(data_path)
+nnmodel_fit(X_train, Y_train, X_test, Y_test, hidden_layers=(5,), learning_rate=0.0001, epochs=300, patience=50)
