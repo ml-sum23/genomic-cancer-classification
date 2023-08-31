@@ -1,4 +1,3 @@
-
 import math
 import numpy as np
 import pandas as pd
@@ -6,7 +5,8 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 
-data_path = '/Users/nguyencaogiakhanh/Desktop/MLSummer23/Tan_data-2/Colon.txt'
+
+data_path = '/Users/nguyencaogiakhanh/Desktop/MLSummer23/genomic-cancer-classification/src/Tan_data-2/Prostate3.txt'
 
 class DataPreprocessing:
     X_train = None
@@ -28,8 +28,6 @@ class DataPreprocessing:
     @staticmethod
     def get_train_test_sets(X,Y):
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.30, shuffle=True, random_state=42)
-        print(X_train.shape, Y_train.shape)
-        print(X_test.shape, Y_test.shape)
         return X_train, X_test, Y_train, Y_test
     
     @staticmethod
@@ -42,26 +40,23 @@ class DataPreprocessing:
     def get_smote(X_train,Y_train):
         smote = SMOTE(sampling_strategy='auto') 
         X_train, y_train= smote.fit_resample(X_train, Y_train)
-        print(X_train.shape, y_train.shape)
         return X_train, y_train
     
     @staticmethod
     def get_weights(Y_train):
         class_weights = dict(zip(np.unique(Y_train), (1 / np.bincount(Y_train))))
-        print(class_weights)
         return class_weights
-    
-    
-def automate_data_processing(data_path):
+
+
+
+def automate_data_processing(filename):
 
     #getting data
-    print('loading data...')
-    data = DataPreprocessing.get_df(data_path = data_path)
-    print('getting features and labels')
+    data = DataPreprocessing.get_df(data_path = filename)
 
     #getting features and labels
     features, labels = DataPreprocessing.get_features_labels(data)
-    
+
     #one-hot encode y
     labels = DataPreprocessing.get_encoder(labels).transform(labels)
 
@@ -73,5 +68,17 @@ def automate_data_processing(data_path):
 
     #get weights 
     DataPreprocessing.get_weights(Y_train)
+
     return X_train, Y_train, X_test, Y_test
+    
+    
+###################### test code ###################
+if __name__ == '__main__':
+    automate_data_processing(data_path)
+
+
+
+
+
+    
 
